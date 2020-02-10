@@ -1,24 +1,12 @@
-import os
-import requests
+from config import train_config
+from data.transforms.augmentations import ClassifyAugmentation2
+import cv2
+import albumentations
 
-# proxy = {"http": "http://127.0.0.1:7890", "https": "https://127.0.0.1:7890"}
+img = cv2.imread("/Users/yang/PycharmProjects/notebooks/images/parrot.jpg")
 
+print(img.shape)
+res = ClassifyAugmentation2(train_config)(img)
 
-def downPic(path, url):
-    if os.path.exists(path):
-        return
-    try:
-        r = requests.get(url, timeout=30)
-        with open(path, "wb") as f:
-            f.write(r.content)
-    except:
-        print("error,", url)
+print(res[0])
 
-
-# requests.get("https://www.reddit.com/r/Hegoesdown/top/?t=all")
-for line in open("urls_porn.txt"):
-    url = line.strip()
-    name = "porn_" + url.split("/")[-1]
-    print(name, url)
-    downPic(name, url)
-    exit()

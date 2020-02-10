@@ -19,6 +19,7 @@ def train_run(trainloader, model, criterion, optimizer, epoch, epoch_iters, max_
 
     for batch_idx, (inputs, targets) in enumerate(trainloader):
         # measure data loading time
+        # print(inputs.shape)
         data_time.update(time.time() - end)
         if device:
             inputs = inputs.cuda()

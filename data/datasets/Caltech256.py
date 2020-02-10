@@ -5,7 +5,7 @@ Created on: 2019-09-17 15:09:41
 import os
 from PIL import Image
 from torch.utils import data
-
+import cv2
 
 class Caltech(data.Dataset):
     def __init__(self, root=None, file=None, transform=None):
@@ -29,7 +29,8 @@ class Caltech(data.Dataset):
 
     def __getitem__(self, index):
         item = self.img_targets[index]
-        image = Image.open(os.path.join(self.root, item["path"])).convert("RGB")  # 一定要加上，因为灰度图读进来只有一个通道
+        # image = Image.open(os.path.join(self.root, item["path"])).convert("RGB")  # 一定要加上，因为灰度图读进来只有一个通道
+        image = cv2.imread(os.path.join(self.root, item["path"]))
         target_int = item["target"]
         if self.transform:
             image = self.transform(image)

@@ -2,7 +2,8 @@ import torch
 import os
 # from modeling.resnet import resnet50
 # from modeling.alexnet import AlexNet
-from modeling.resnet import wide_resnet101_2
+# from modeling.resnet import wide_resnet101_2
+from modeling.efficientnet_pytorch import EfficientNet
 from utils import Plog, summary
 from data import getData
 from config import train_config, val_config
@@ -28,17 +29,23 @@ def train():
     # model_dict.update(paras)
     # model.load_state_dict(model_dict)
 
-    model = wide_resnet101_2(num_classes=257)
-    model_dict = model.state_dict()
-    paras = torch.load("pre_weights/wide_resnet101_2-32ee1156.pth")
-    paras = {k: v for k, v in paras.items() if k not in ["fc.weight", "fc.bias"]}
-    model_dict.update(paras)
-    model.load_state_dict(model_dict)
+    # model = wide_resnet101_2(num_classes=257)
+    # model_dict = model.state_dict()
+    # paras = torch.load("pre_weights/wide_resnet101_2-32ee1156.pth")
+    # paras = {k: v for k, v in paras.items() if k not in ["fc.weight", "fc.bias"]}
+    # model_dict.update(paras)
+    # model.load_state_dict(model_dict)
+
+    # model = EfficientNet.from_pretrained('efficientnet-b0', num_classes=257)
+    # model = EfficientNet.from_pretrained('efficientnet-b1', num_classes=257)
+    model = EfficientNet.from_pretrained('efficientnet-b2', num_classes=257)
+    # model = EfficientNet.from_pretrained('efficientnet-b7', num_classes=257)
+
 
     if cuda_:
         model.cuda()
     #
-    summary(model, (3, 224, 224))
+    # summary(model, (3, 224, 224))
 
     # data
     trainData = getData('train')

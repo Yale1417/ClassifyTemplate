@@ -4,11 +4,11 @@
 @contact: sherlockliao01@gmail.com
 """
 from .datasets.Caltech256 import Caltech
-from .transforms.augmentations import ClassifyAugmentation
+from .transforms.augmentations import ClassifyAugmentation, ClassifyAugmentation2, ClassifyAugmentation3
 from config.config import dataset_base, train_config, val_config
 
-train_transform = ClassifyAugmentation(train_config)
-val_transform = ClassifyAugmentation(val_config)
+train_transform = ClassifyAugmentation2(train_config)
+val_transform = ClassifyAugmentation3(val_config)
 
 
 def getData(mode):

@@ -7,7 +7,8 @@ import math
 import random
 import cv2
 import torchvision.transforms.functional as F
-
+from albumentations.core.transforms_interface import DualTransform
+import albumentations.augmentations.functional as ALF
 
 __all__ = ["PadResize"]
 
@@ -17,6 +18,7 @@ class PadResize(object):
     PIL 实现方式
     resize的时候保持原图的有效像素长宽比不变，其他位置以填充值替代
     """
+
     def __init__(self, size, fill=(127, 127, 127)):
         assert (isinstance(size, tuple) and len(size) == 2)
         self.size = size  # (h, w) 与 openCV 的相反
@@ -28,9 +30,9 @@ class PadResize(object):
         rate_dst = self.size[0] / self.size[1]
         rate_src = height / width
         if rate_dst > rate_src:
-            pad_h = int(rate_dst*width-height)
+            pad_h = int(rate_dst * width - height)
         else:
-            pad_w = int(height/rate_dst-width)
+            pad_w = int(height / rate_dst - width)
         return F.resize(F.pad(img, (pad_w // 2, pad_h // 2, pad_w - pad_w // 2, pad_h - pad_h // 2), self.fill),
                         self.size)
 
@@ -82,7 +84,7 @@ class RandomErasing(object):
         return img
 
 
-# class PadResize(object):
+# class PadResizeCv(object):
 #     """"
 #     cv2 实现方式
 #     resize的时候保持原图的有效像素长宽比不变，其他位置以填充值替代
@@ -106,3 +108,61 @@ class RandomErasing(object):
 #         img = cv2.resize(img, self.size)
 #
 #         return img
+
+class PadResizeCv(DualTransform):
+    """
+
+    Args:
+        size (int,int): (h,w)
+        border_mode (OpenCV flag): OpenCV border mode.
+        value (int, float, list of int, lisft of float): padding value if border_mode is cv2.BORDER_CONSTANT.
+        p (float): probability of applying the transform. Default: 1.0.
+
+    Targets:
+        image
+
+    Image types:
+        uint8, float32
+
+    """
+
+    def __init__(
+            self,
+            size=None,
+            border_mode=cv2.BORDER_CONSTANT,
+            value=(127, 127, 127),
+            always_apply=False,
+            p=1.0,
+    ):
+        super(PadResizeCv, self).__init__(always_apply, p)
+        self.size = size
+        self.border_mode = border_mode
+        self.value = value
+
+    def update_params(self, params, **kwargs):
+        params = super(PadResizeCv, self).update_params(params, **kwargs)
+        height = params["rows"]
+        width = params["cols"]
+        pad_w, pad_h = 0, 0
+        rate_dst = self.size[1] / self.size[0]
+        rate_src = height / width
+        if rate_dst > rate_src:
+            pad_h = int(rate_dst * width - height)
+        else:
+            pad_w = int(height / rate_dst - width)
+
+        params.update(
+            {"pad_top": pad_h // 2, "pad_bottom": pad_h - pad_h // 2, "pad_left": pad_w // 2,
+             "pad_right": pad_w - pad_w // 2}
+        )
+        return params
+
+    def apply(self, img, pad_top=0, pad_bottom=0, pad_left=0, pad_right=0, **params):
+        img = ALF.pad_with_params(
+            img, pad_top, pad_bottom, pad_left, pad_right, border_mode=self.border_mode, value=self.value
+        )
+        img = cv2.resize(img, self.size)
+        return img
+
+    def get_transform_init_args_names(self):
+        return ("size", "border_mode", "value")
